@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageVersionOverrideEnabled>false</CentralPackageVersionOverrideEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Production dependencies -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test/tooling dependencies -->
+  </ItemGroup>
+
+</Project>
