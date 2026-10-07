@@ -20,6 +20,8 @@ public sealed class BlazorAppTemplateBuildTests : IDisposable
             <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.12" />
             <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.12" />
             <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.12" />
+            <PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.12" />
+            <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
             <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.114" />
           </ItemGroup>
         </Project>
@@ -28,10 +30,11 @@ public sealed class BlazorAppTemplateBuildTests : IDisposable
     private readonly DirectoryInfo _solutionDirectory = Directory.CreateTempSubdirectory("kdsoftware-blazor-app-");
 
     [Theory]
-    [InlineData("oidc", true)]
-    [InlineData("none", true)]
-    [InlineData("none", false)]
-    public async Task ProjectsAreAddedToExistingSolutionAndBuildCleanly(string auth, bool centralPackageManagement)
+    [InlineData("oidc", true, "cookie")]
+    [InlineData("oidc", true, "redis")]
+    [InlineData("none", true, "cookie")]
+    [InlineData("none", false, "cookie")]
+    public async Task ProjectsAreAddedToExistingSolutionAndBuildCleanly(string auth, bool centralPackageManagement, string sessionStore)
     {
         string root = _solutionDirectory.FullName;
         string hive = Path.Combine(root, ".hive");
@@ -53,6 +56,7 @@ public sealed class BlazorAppTemplateBuildTests : IDisposable
             "--name", "MyApp",
             "--auth", auth,
             "--central-package-management", centralPackageManagement ? "true" : "false",
+            "--session-store", sessionStore,
             "--debug:custom-hive", hive);
 
         string solution = await File.ReadAllTextAsync(Path.Combine(root, "MySolution.slnx"));

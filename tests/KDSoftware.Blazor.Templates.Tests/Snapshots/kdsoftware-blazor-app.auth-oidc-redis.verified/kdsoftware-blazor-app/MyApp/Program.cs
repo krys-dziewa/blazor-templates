@@ -1,26 +1,16 @@
-#if (UseOidc)
-using KDSoftware.BlazorApp.Authentication;
-#endif
-using KDSoftware.BlazorApp.Components;
+﻿using MyApp.Authentication;
+using MyApp.Components;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
-#if (UseOidc)
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
-#else
-    .AddInteractiveWebAssemblyComponents();
-#endif
 
-#if (UseOidc)
 builder.Services.AddOidcBffAuthentication();
-#if (UseRedisSessionStore)
 builder.Services.AddDistributedSessionStore(builder.Configuration);
-#endif
 
-#endif
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -37,22 +27,18 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseBffApiProtection();
-#if (UseOidc)
 app.UseAuthentication();
 app.UseAuthorization();
-#endif
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(KDSoftware.BlazorApp.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(MyApp.Client._Imports).Assembly);
 
-#if (UseOidc)
 app.MapLoginAndLogout();
 
-#endif
 // Map endpoints called by WebAssembly components under BffApiApplicationBuilderExtensions.ApiPathPrefix (/api);
 // they are protected by UseBffApiProtection.
 

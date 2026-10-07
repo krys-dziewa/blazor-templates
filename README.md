@@ -54,6 +54,7 @@ dotnet new kdsoftware-blazor-app -n MyApplication --auth none --central-package-
 | Option | Description |
 | --- | --- |
 | `-au`, `--auth <oidc\|none>` | Authentication mode. Default: `oidc`. |
+| `--session-store <cookie\|redis>` | Where the OIDC session (claims and tokens) is stored: in the encrypted cookie or in Valkey/Redis. Only with `--auth oidc`. Default: `cookie`. |
 | `--central-package-management <true\|false>` | Whether the solution manages package versions in `Directory.Packages.props`. Default: `true`. |
 | `--http-port`, `--https-port` | Ports used in `launchSettings.json`. Generated when omitted. |
 | `--no-restore` | Skips the automatic restore after the projects are created. |
@@ -68,6 +69,9 @@ list after creation):
 <!-- --auth oidc only -->
 <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.12" />
 <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.12" />
+<!-- --session-store redis only -->
+<PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.12" />
+<PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
 ```
 
 **Client libraries.** Bootstrap is declared in `libman.json` and restored into `wwwroot/lib` by
@@ -79,6 +83,18 @@ to your `.gitignore`.
 Configure your identity provider in the `Authentication:Oidc` section (`Authority`, `ClientId`, `ClientSecret`,
 `Scopes`), keep the client secret in user secrets or a secret store, and register `https://<host>/signin-oidc` and
 `https://<host>/signout-callback-oidc` as redirect URIs. The configuration is validated at startup.
+
+**Session store.** By default the whole session (claims plus access, refresh and id tokens) lives in the encrypted
+session cookie. With `--session-store redis` the cookie carries only an opaque session key and the session ticket is
+stored, encrypted with ASP.NET Core Data Protection, in [Valkey](https://valkey.io) or Redis. This keeps the cookie
+small, lets you revoke sessions on the server (signing out deletes the entry) and, because the Data Protection keys
+are stored in the same server, lets every instance read the session cookie. Configure the server with the
+`ConnectionStrings:SessionStore` setting (a [StackExchange.Redis connection string](https://stackexchange.github.io/StackExchange.Redis/Configuration),
+for example `valkey:6379,password=...`); the app refuses to start without it. Development uses `localhost:6379`:
+
+```bash
+podman run -d -p 6379:6379 docker.io/valkey/valkey
+```
 
 **Containers.** The server project contains a `Containerfile`. Build it with the solution root as context so that
 solution-level files such as `Directory.Packages.props` are available:

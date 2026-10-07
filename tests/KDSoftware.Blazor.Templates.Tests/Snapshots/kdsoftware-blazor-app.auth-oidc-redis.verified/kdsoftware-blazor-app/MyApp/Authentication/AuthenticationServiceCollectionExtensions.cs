@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
-namespace KDSoftware.BlazorApp.Authentication;
+namespace MyApp.Authentication;
 
 internal static class AuthenticationServiceCollectionExtensions
 {
@@ -12,14 +12,9 @@ internal static class AuthenticationServiceCollectionExtensions
     public const string OidcScheme = OpenIdConnectDefaults.AuthenticationScheme;
 
     /// <summary>
-#if (UseRedisSessionStore)
     /// Adds server-side OpenID Connect sign-in with a cookie session. Tokens are kept in the session store
     /// (see <see cref="SessionStoreServiceCollectionExtensions.AddDistributedSessionStore"/>) and are never
     /// exposed to the browser or to WebAssembly code.
-#else
-    /// Adds server-side OpenID Connect sign-in with a cookie session. Tokens are kept in the encrypted
-    /// cookie on the server and are never exposed to the browser or to WebAssembly code.
-#endif
     /// </summary>
     public static IServiceCollection AddOidcBffAuthentication(this IServiceCollection services)
     {
@@ -36,7 +31,7 @@ internal static class AuthenticationServiceCollectionExtensions
             .AddCookie(CookieScheme, options =>
             {
                 // The __Host- prefix makes the browser reject the cookie unless it is Secure, host-only and scoped to "/".
-                options.Cookie.Name = "__Host-KDSoftware.BlazorApp";
+                options.Cookie.Name = "__Host-MyApp";
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Events.OnRedirectToAccessDenied = static context =>

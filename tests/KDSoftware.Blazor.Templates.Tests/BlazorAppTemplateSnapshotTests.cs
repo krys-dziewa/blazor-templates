@@ -9,10 +9,11 @@ namespace KDSoftware.Blazor.Templates.Tests;
 public sealed partial class BlazorAppTemplateSnapshotTests
 {
     [Theory]
-    [InlineData("oidc", true)]
-    [InlineData("none", true)]
-    [InlineData("none", false)]
-    public async Task GeneratedContentMatchesSnapshot(string auth, bool centralPackageManagement)
+    [InlineData("oidc", true, "cookie")]
+    [InlineData("oidc", true, "redis")]
+    [InlineData("none", true, "cookie")]
+    [InlineData("none", false, "cookie")]
+    public async Task GeneratedContentMatchesSnapshot(string auth, bool centralPackageManagement, string sessionStore)
     {
         // The template is added to an existing solution, so instantiate it next to one; the snapshot then
         // also covers the projects being added to the solution.
@@ -20,7 +21,7 @@ public sealed partial class BlazorAppTemplateSnapshotTests
         try
         {
             await File.WriteAllTextAsync(Path.Combine(outputDirectory.FullName, "MySolution.slnx"), "<Solution />");
-            await VerifyAsync(auth, centralPackageManagement, outputDirectory.FullName);
+            await VerifyAsync(auth, centralPackageManagement, sessionStore, outputDirectory.FullName);
         }
         finally
         {
@@ -28,8 +29,19 @@ public sealed partial class BlazorAppTemplateSnapshotTests
         }
     }
 
-    private static async Task VerifyAsync(string auth, bool centralPackageManagement, string outputDirectory)
+    private static async Task VerifyAsync(string auth, bool centralPackageManagement, string sessionStore, string outputDirectory)
     {
+        string scenarioName = $"auth-{auth}";
+        if (sessionStore != "cookie")
+        {
+            scenarioName += $"-{sessionStore}";
+        }
+
+        if (!centralPackageManagement)
+        {
+            scenarioName += "-nocpm";
+        }
+
         TemplateVerifierOptions options = new TemplateVerifierOptions(TemplatePaths.BlazorAppShortName)
         {
             OutputDirectory = outputDirectory,
@@ -40,12 +52,13 @@ public sealed partial class BlazorAppTemplateSnapshotTests
                 "--name", "MyApp",
                 "--auth", auth,
                 "--central-package-management", centralPackageManagement ? "true" : "false",
+                "--session-store", sessionStore,
                 "--http-port", "5000",
                 "--https-port", "7000",
                 "--no-restore",
             ],
             SnapshotsDirectory = "Snapshots",
-            ScenarioName = centralPackageManagement ? $"auth-{auth}" : $"auth-{auth}-nocpm",
+            ScenarioName = scenarioName,
             DoNotAppendTemplateArgsToScenarioName = true,
             DoNotPrependCallerMethodNameToScenarioName = true,
             DisableDiffTool = true,

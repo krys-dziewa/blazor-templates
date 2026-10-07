@@ -48,6 +48,26 @@
       "type": "computed",
       "value": "(auth == \"oidc\")"
     },
+    "sessionStore": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Where the OpenID Connect session (claims and tokens) is stored. Only applies when --auth is oidc.",
+      "defaultValue": "cookie",
+      "choices": [
+        {
+          "choice": "cookie",
+          "description": "Claims and tokens are kept in the encrypted session cookie."
+        },
+        {
+          "choice": "redis",
+          "description": "The session ticket is kept in Valkey or Redis and the cookie holds only a session key. Data Protection keys are shared through the same store."
+        }
+      ]
+    },
+    "UseRedisSessionStore": {
+      "type": "computed",
+      "value": "(UseOidc && sessionStore == \"redis\")"
+    },
     "centralPackageManagement": {
       "type": "parameter",
       "datatype": "bool",
@@ -136,10 +156,34 @@
             "KDSoftware.BlazorApp/Authentication/**",
             "KDSoftware.BlazorApp/Components/Layout/LoginDisplay.razor"
           ]
+        },
+        {
+          "condition": "(!UseRedisSessionStore)",
+          "exclude": [
+            "KDSoftware.BlazorApp/Authentication/DistributedCacheTicketStore.cs",
+            "KDSoftware.BlazorApp/Authentication/SessionStoreServiceCollectionExtensions.cs"
+          ]
         }
       ]
     }
   ],
+  "SpecialCustomOperations": {
+    "**/Containerfile": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "if": [ "#if" ],
+            "else": [ "#else" ],
+            "elseif": [ "#elseif" ],
+            "endif": [ "#endif" ],
+            "trim": true,
+            "wholeLine": true
+          }
+        }
+      ]
+    }
+  },
   "primaryOutputs": [
     { "path": "KDSoftware.BlazorApp/KDSoftware.BlazorApp.csproj" },
     { "path": "KDSoftware.BlazorApp.Client/KDSoftware.BlazorApp.Client.csproj" }
@@ -166,7 +210,11 @@
         },
         {
           "text": "Make sure Directory.Packages.props defines PackageVersion entries for: Microsoft.AspNetCore.Components.WebAssembly (10.0.12), Microsoft.AspNetCore.Components.WebAssembly.Authentication (10.0.12), Microsoft.AspNetCore.Components.WebAssembly.Server (10.0.12), Microsoft.AspNetCore.Authentication.OpenIdConnect (10.0.12), Microsoft.Web.LibraryManager.Build (3.0.114)",
-          "condition": "(UseOidc)"
+          "condition": "(UseOidc && !UseRedisSessionStore)"
+        },
+        {
+          "text": "Make sure Directory.Packages.props defines PackageVersion entries for: Microsoft.AspNetCore.Components.WebAssembly (10.0.12), Microsoft.AspNetCore.Components.WebAssembly.Authentication (10.0.12), Microsoft.AspNetCore.Components.WebAssembly.Server (10.0.12), Microsoft.AspNetCore.Authentication.OpenIdConnect (10.0.12), Microsoft.AspNetCore.DataProtection.StackExchangeRedis (10.0.12), Microsoft.Extensions.Caching.StackExchangeRedis (10.0.12), Microsoft.Web.LibraryManager.Build (3.0.114)",
+          "condition": "(UseRedisSessionStore)"
         }
       ],
       "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
