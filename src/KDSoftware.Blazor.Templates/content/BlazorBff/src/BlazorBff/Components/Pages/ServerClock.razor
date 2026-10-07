@@ -1,0 +1,52 @@
+@page "/server-clock"
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+
+@*
+    Interactive Server: the component runs on the server and UI updates are pushed over a SignalR
+    circuit. Choose it when interactive UI needs server-only resources and WebAssembly is not worth it.
+*@
+
+<PageTitle>Server clock</PageTitle>
+
+<h1>Server clock</h1>
+
+<p role="status">Server time: <strong>@_now.ToString("T", System.Globalization.CultureInfo.CurrentCulture)</strong></p>
+
+<p>Rendered by <strong>@RendererInfo.Name</strong> on <strong>@Environment.MachineName</strong>.</p>
+
+@code {
+    private readonly CancellationTokenSource _disposed = new();
+    private DateTimeOffset _now = DateTimeOffset.Now;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _ = TickAsync();
+        }
+    }
+
+    private async Task TickAsync()
+    {
+        using PeriodicTimer timer = new(TimeSpan.FromSeconds(1));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(_disposed.Token))
+            {
+                _now = DateTimeOffset.Now;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // The component was disposed.
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _disposed.CancelAsync();
+        _disposed.Dispose();
+    }
+}

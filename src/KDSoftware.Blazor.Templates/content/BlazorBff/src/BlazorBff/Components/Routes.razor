@@ -1,0 +1,10 @@
+<Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="[typeof(Client._Imports).Assembly]" NotFoundPage="typeof(Pages.NotFound)">
+    <Found Context="routeData">
+@*#if (UseOidc)*@
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+@*#else*@
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+@*#endif*@
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

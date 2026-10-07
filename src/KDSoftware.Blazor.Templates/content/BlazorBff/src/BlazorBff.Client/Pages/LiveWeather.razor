@@ -1,0 +1,57 @@
+@page "/weather/live"
+@rendermode InteractiveAuto
+@inject IWeatherForecastService WeatherForecasts
+
+@*
+    Interactive Auto: prerendered on the server for a fast first paint, then interactive over a
+    Blazor Server circuit until the WebAssembly runtime is downloaded and cached; afterwards the
+    component runs in the browser and talks to the server only through the BFF API.
+*@
+
+<PageTitle>Live weather</PageTitle>
+
+<h1>Live weather</h1>
+
+<p>
+    Rendered by <strong>@RendererInfo.Name</strong>
+    (@(RendererInfo.IsInteractive ? "interactive" : "prerendering")).
+</p>
+
+<button class="btn btn-primary mb-3" disabled="@(!RendererInfo.IsInteractive || _loading)" @onclick="RefreshAsync">
+    Refresh
+</button>
+
+@if (Forecasts is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <WeatherTable Forecasts="Forecasts" />
+}
+
+@code {
+    private bool _loading;
+
+    // Prerendered data is persisted into the page so the interactive render does not fetch it again.
+    [PersistentState]
+    public WeatherForecast[]? Forecasts { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Forecasts ??= await WeatherForecasts.GetForecastsAsync();
+    }
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        try
+        {
+            Forecasts = await WeatherForecasts.GetForecastsAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

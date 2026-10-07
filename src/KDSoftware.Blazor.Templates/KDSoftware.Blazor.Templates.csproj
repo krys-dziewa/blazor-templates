@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+
+    <PackageType>Template</PackageType>
+    <PackageId>KDSoftware.Blazor.Templates</PackageId>
+    <Version>0.1.0</Version>
+    <Title>KDSoftware Blazor Templates</Title>
+    <Authors>Krystian Dziewa</Authors>
+    <Description>Opinionated Blazor project templates: Blazor Web App with Interactive Auto render mode, Backend-for-Frontend (BFF) and OpenID Connect authentication.</Description>
+    <PackageTags>blazor;template;bff;oidc;webassembly;dotnet-new</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <!-- Required so that dot-files such as .template.config, .editorconfig and .gitignore are packed. -->
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <!-- NU5128: a template package intentionally contains no lib/ assemblies for its target framework. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="content\**"
+             Exclude="content\**\bin\**;content\**\obj\**;content\**\.vs\**;content\**\*.user"
+             Pack="true"
+             PackagePath="content" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
