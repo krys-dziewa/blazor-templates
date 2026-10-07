@@ -1,60 +1,46 @@
-# MyProject
+# KDSoftware.Blazor.Templates
 
-`MyProject` is a .NET 10 solution organized around centralized build configuration, package management, consistent code quality rules, and reproducible builds.
+A collection of opinionated Blazor project templates for building modern .NET applications.
 
-## Requirements
+The package includes templates for common application architectures, including:
 
-Install the .NET SDK version selected by [`global.json`](./global.json).
+- Blazor Web App with **Interactive Auto** render mode
+- **Backend-for-Frontend (BFF)** architecture
+- **OpenID Connect (OIDC)** authentication
+- Sensible defaults for modern .NET and Blazor applications
 
-Verify your environment with:
+## Installation
 
-```bash
-dotnet --version
-dotnet --info
-```
-
-The repository is configured to use a compatible .NET 10 SDK according to the roll-forward policy defined in `global.json`.
-
-## Repository structure
-
-```text
-.
-├── src/
-│   ├── MyProject.App/
-│   └── MyProject.Core/
-│
-├── tests/
-│   └── MyProject.Core.Tests/
-│
-├── AGENTS.md
-├── Directory.Build.props
-├── Directory.Build.targets
-├── Directory.Packages.props
-├── global.json
-├── MyProject.slnx
-└── README.md
-```
-
-### Repository configuration
-
-The repository uses several root-level files to keep configuration centralized:
-
-| File | Purpose |
-| --- | --- |
-| `global.json` | Selects the .NET SDK and SDK roll-forward policy |
-| `Directory.Build.props` | Defines repository-wide MSBuild and compiler settings |
-| `Directory.Build.targets` | Contains repository-wide custom build targets when needed |
-| `Directory.Packages.props` | Centrally manages NuGet package versions |
-| `.editorconfig` | Defines formatting and code-style conventions |
-| `AGENTS.md` | Instructions for AI coding agents and automated development tools |
-| `MyProject.slnx` | Solution definition |
-
-Individual project files should remain as small as practical and inherit shared configuration from these files.
-
-## Getting started
-
-Clone the repository and restore dependencies:
+Install the templates from NuGet:
 
 ```bash
-git clone <repository-url>
-cd MyProject
+dotnet new install KDSoftware.Blazor.Templates
+```
+
+List the available templates:
+
+```bash
+dotnet new list KDSoftware
+```
+
+Create a project using one of the installed templates:
+
+```bash
+dotnet new <template-name> -n MyApplication
+```
+
+## Updating
+
+```bash
+dotnet new update
+```
+
+## Uninstalling
+
+```bash
+dotnet new uninstall KDSoftware.Blazor.Templates
+```
+
+## License
+
+See [LICENSE](LICENSE) for details.
