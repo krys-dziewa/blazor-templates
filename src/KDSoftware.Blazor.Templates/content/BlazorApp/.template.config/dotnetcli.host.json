@@ -5,6 +5,10 @@
       "longName": "auth",
       "shortName": "au"
     },
+    "sessionStore": {
+      "longName": "session-store",
+      "shortName": ""
+    },
     "skipRestore": {
       "longName": "no-restore",
       "shortName": ""

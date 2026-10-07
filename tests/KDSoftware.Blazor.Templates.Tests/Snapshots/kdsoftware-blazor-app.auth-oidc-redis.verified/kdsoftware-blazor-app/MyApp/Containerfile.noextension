@@ -1,22 +1,20 @@
 # Build from the solution root so that solution-level files (Directory.Build.props,
 # Directory.Packages.props, global.json, ...) are part of the build context, for example:
 #
-#   podman build -f src/KDSoftware.BlazorApp/Containerfile --build-arg PROJECT_PATH=src/KDSoftware.BlazorApp/KDSoftware.BlazorApp.csproj -t kdsoftware.blazorapp .
+#   podman build -f src/MyApp/Containerfile --build-arg PROJECT_PATH=src/MyApp/MyApp.csproj -t myapp .
 #
 # PROJECT_PATH is relative to the build context. Behind a TLS-terminating reverse proxy, run the container with
 # ASPNETCORE_FORWARDEDHEADERS_ENABLED=true so that the app sees the original scheme (required for OIDC redirects
 # and the __Host- session cookie).
-#if (UseRedisSessionStore)
 #
 # Sessions and Data Protection keys are stored in Valkey or Redis; pass its connection string when running, e.g.
 #
-#   podman run -e ConnectionStrings__SessionStore=valkey:6379 -p 8080:8080 kdsoftware.blazorapp
-#endif
+#   podman run -e ConnectionStrings__SessionStore=valkey:6379 -p 8080:8080 myapp
 
 ARG DOTNET_VERSION=10.0
 
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
-ARG PROJECT_PATH=KDSoftware.BlazorApp/KDSoftware.BlazorApp.csproj
+ARG PROJECT_PATH=MyApp/MyApp.csproj
 WORKDIR /src
 COPY . .
 # Host build output (for example obj/project.assets.json with host paths) must not leak into the container build.
@@ -28,4 +26,4 @@ WORKDIR /app
 COPY --from=build /app/publish .
 USER $APP_UID
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "KDSoftware.BlazorApp.dll"]
+ENTRYPOINT ["dotnet", "MyApp.dll"]
