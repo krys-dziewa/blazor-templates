@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <Content Include="content\**"
-             Exclude="content\**\bin\**;content\**\obj\**;content\**\.vs\**;content\**\*.user"
+             Exclude="content\**\bin\**;content\**\obj\**;content\**\.vs\**;content\**\*.user;content\**\wwwroot\lib\**"
              Pack="true"
              PackagePath="content" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />

@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Krystian Dziewa",
+  "classifications": [ "Web", "Blazor", "WebAssembly", "BFF" ],
+  "identity": "KDSoftware.Blazor.Templates.BlazorApp.CSharp",
+  "groupIdentity": "KDSoftware.Blazor.Templates.BlazorApp",
+  "name": "KDSoftware Blazor App",
+  "description": "Server and WebAssembly client projects for a Blazor Web App in which the ASP.NET Core server acts as a Backend-for-Frontend (cookie session, optional OpenID Connect, CSRF-protected API). Adds the projects to the existing solution.",
+  "shortName": "kdsoftware-blazor-app",
+  "sourceName": "KDSoftware.BlazorApp",
+  "preferNameDirectory": false,
+  "defaultName": "BlazorApp",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "Framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "The target framework for the projects.",
+      "defaultValue": "net10.0",
+      "replaces": "net10.0",
+      "choices": [
+        {
+          "choice": "net10.0",
+          "description": "Target net10.0"
+        }
+      ]
+    },
+    "auth": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "The authentication mode of the BFF.",
+      "defaultValue": "oidc",
+      "choices": [
+        {
+          "choice": "oidc",
+          "description": "OpenID Connect sign-in handled by the server with a secure cookie session. Tokens never reach the browser."
+        },
+        {
+          "choice": "none",
+          "description": "No authentication."
+        }
+      ]
+    },
+    "UseOidc": {
+      "type": "computed",
+      "value": "(auth == \"oidc\")"
+    },
+    "centralPackageManagement": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Whether the target solution uses central package management (package versions in Directory.Packages.props).",
+      "defaultValue": "true"
+    },
+    "UseCpm": {
+      "type": "computed",
+      "value": "(centralPackageManagement)"
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the projects on create.",
+      "defaultValue": "false"
+    },
+    "httpPort": {
+      "type": "parameter",
+      "datatype": "integer",
+      "description": "Port number to use for the HTTP endpoint in launchSettings.json."
+    },
+    "httpPortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "low": 5000,
+        "high": 5300
+      }
+    },
+    "httpPortReplacer": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "httpPort",
+        "fallbackVariableName": "httpPortGenerated"
+      },
+      "replaces": "5299"
+    },
+    "httpsPort": {
+      "type": "parameter",
+      "datatype": "integer",
+      "description": "Port number to use for the HTTPS endpoint in launchSettings.json."
+    },
+    "httpsPortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "low": 7000,
+        "high": 7300
+      }
+    },
+    "httpsPortReplacer": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "httpsPort",
+        "fallbackVariableName": "httpsPortGenerated"
+      },
+      "replaces": "7299"
+    },
+    "userSecretsId": {
+      "type": "generated",
+      "generator": "guid",
+      "replaces": "aspnet-KDSoftware.BlazorApp-53bc9b9d-9d6a-45d4-8429-2a2761773502",
+      "parameters": {
+        "defaultFormat": "d"
+      }
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/[Bb]in/**",
+            "**/[Oo]bj/**",
+            ".template.config/**",
+            "**/.vs/**",
+            "**/*.user",
+            "**/wwwroot/lib/**"
+          ]
+        },
+        {
+          "condition": "(!UseOidc)",
+          "exclude": [
+            "KDSoftware.BlazorApp/Authentication/**",
+            "KDSoftware.BlazorApp/Components/Layout/LoginDisplay.razor"
+          ]
+        }
+      ]
+    }
+  ],
+  "primaryOutputs": [
+    { "path": "KDSoftware.BlazorApp/KDSoftware.BlazorApp.csproj" },
+    { "path": "KDSoftware.BlazorApp.Client/KDSoftware.BlazorApp.Client.csproj" }
+  ],
+  "postActions": [
+    {
+      "description": "Add the projects to the solution. The client project is added through the server project's reference.",
+      "manualInstructions": [
+        { "text": "Add the generated projects to your solution with 'dotnet sln add'." }
+      ],
+      "actionId": "D396686C-DE0E-4DE6-906D-291CD29FC5DE",
+      "args": {
+        "primaryOutputIndexes": "0"
+      },
+      "continueOnError": true
+    },
+    {
+      "condition": "(UseCpm)",
+      "description": "Package versions required in Directory.Packages.props.",
+      "manualInstructions": [
+        {
+          "text": "Make sure Directory.Packages.props defines PackageVersion entries for: Microsoft.AspNetCore.Components.WebAssembly (10.0.12), Microsoft.AspNetCore.Components.WebAssembly.Server (10.0.12), Microsoft.Web.LibraryManager.Build (3.0.114)",
+          "condition": "(!UseOidc)"
+        },
+        {
+          "text": "Make sure Directory.Packages.props defines PackageVersion entries for: Microsoft.AspNetCore.Components.WebAssembly (10.0.12), Microsoft.AspNetCore.Components.WebAssembly.Authentication (10.0.12), Microsoft.AspNetCore.Components.WebAssembly.Server (10.0.12), Microsoft.AspNetCore.Authentication.OpenIdConnect (10.0.12), Microsoft.Web.LibraryManager.Build (3.0.114)",
+          "condition": "(UseOidc)"
+        }
+      ],
+      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+      "continueOnError": true
+    },
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by the projects.",
+      "manualInstructions": [
+        { "text": "Run 'dotnet restore'" }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
+}

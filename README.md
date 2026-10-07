@@ -31,31 +31,65 @@ dotnet new <template-name> -n MyApplication
 
 ## Templates
 
-### Blazor BFF Web App (`kd-blazor-bff`)
+### KDSoftware Blazor App (`kdsoftware-blazor-app`)
 
-A Blazor Web App solution (`MyApplication` server + `MyApplication.Client` WebAssembly project) where the
-ASP.NET Core server acts as a Backend-for-Frontend:
+Adds two projects to an **existing** solution: `MyApplication` (ASP.NET Core server) and `MyApplication.Client`
+(WebAssembly). The server acts as a Backend-for-Frontend:
 
 - pages are statically server-rendered by default for the fastest first paint; individual pages and components opt in
   to `InteractiveServer`, `InteractiveWebAssembly` or `InteractiveAuto`;
-- optional OpenID Connect sign-in handled entirely on the server with a secure cookie session; tokens never reach the browser;
-- `/api` endpoints for WebAssembly components, protected against CSRF, and a YARP reverse proxy that forwards
-  configured routes to downstream APIs with the user's access token.
+- optional OpenID Connect sign-in handled entirely on the server with a secure cookie session; access tokens are kept
+  and refreshed on the server and never reach the browser;
+- endpoints under `/api` require an `X-CSRF` header, which the WebAssembly `HttpClient` sends automatically.
+
+Run the template from the folder that should contain the projects (for example `src`). The projects are added to the
+nearest `.sln`/`.slnx` file:
 
 ```bash
-dotnet new kd-blazor-bff -n MyApplication
-dotnet new kd-blazor-bff -n MyApplication --auth none
+cd src
+dotnet new kdsoftware-blazor-app -n MyApplication
+dotnet new kdsoftware-blazor-app -n MyApplication --auth none --central-package-management false
 ```
 
 | Option | Description |
 | --- | --- |
 | `-au`, `--auth <oidc\|none>` | Authentication mode. Default: `oidc`. |
+| `--central-package-management <true\|false>` | Whether the solution manages package versions in `Directory.Packages.props`. Default: `true`. |
 | `--http-port`, `--https-port` | Ports used in `launchSettings.json`. Generated when omitted. |
-| `--no-restore` | Skips the automatic restore after the solution is created. |
+| `--no-restore` | Skips the automatic restore after the projects are created. |
 
-With `--auth oidc` the Development configuration points at the public
+With central package management, `Directory.Packages.props` must define these packages (the template prints the
+list after creation):
+
+```xml
+<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.12" />
+<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.12" />
+<PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.114" />
+<!-- --auth oidc only -->
+<PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.12" />
+<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.12" />
+```
+
+**Client libraries.** Bootstrap is declared in `libman.json` and restored into `wwwroot/lib` by
+[LibMan](https://learn.microsoft.com/aspnet/core/client-side/libman/) during the build. Consider adding `wwwroot/lib/`
+to your `.gitignore`.
+
+**Authentication.** With `--auth oidc` the Development configuration points at the public
 [Duende IdentityServer demo](https://demo.duendesoftware.com) (user `bob`, password `bob`) so the app works out of the box.
-The generated `README.md` explains how to configure your own identity provider.
+Configure your identity provider in the `Authentication:Oidc` section (`Authority`, `ClientId`, `ClientSecret`,
+`Scopes`), keep the client secret in user secrets or a secret store, and register `https://<host>/signin-oidc` and
+`https://<host>/signout-callback-oidc` as redirect URIs. The configuration is validated at startup.
+
+**Containers.** The server project contains a `Containerfile`. Build it with the solution root as context so that
+solution-level files such as `Directory.Packages.props` are available:
+
+```bash
+podman build -f src/MyApplication/Containerfile --build-arg PROJECT_PATH=src/MyApplication/MyApplication.csproj -t myapplication .
+```
+
+The container listens on HTTP port 8080. Behind a TLS-terminating reverse proxy, set
+`ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` so that the app sees the original scheme, which OIDC redirects and the
+`__Host-` session cookie require.
 
 ## Updating
 
@@ -75,7 +109,7 @@ The template sources live in `src/KDSoftware.Blazor.Templates/content`. Install 
 source folder to try local changes:
 
 ```bash
-dotnet new install ./src/KDSoftware.Blazor.Templates/content/BlazorBff --force
+dotnet new install ./src/KDSoftware.Blazor.Templates/content/BlazorApp --force
 ```
 
 Build, test and pack from the repository root:
@@ -88,7 +122,7 @@ dotnet pack src/KDSoftware.Blazor.Templates --no-restore -o artifacts
 ```
 
 The tests compare the generated output with the snapshots in `tests/KDSoftware.Blazor.Templates.Tests/Snapshots`
-and build every template variant. Tests that instantiate and build the template are marked
+and add every template variant to a new solution and build it. Tests that instantiate and build the template are marked
 `Category=Integration` and need access to NuGet; exclude them with `--filter "Category!=Integration"`.
 
 When a template change is intentional, the failing snapshot test writes a `*.received` folder next to the

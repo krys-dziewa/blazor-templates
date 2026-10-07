@@ -2,12 +2,12 @@ namespace KDSoftware.Blazor.Templates.Tests;
 
 internal static class TemplatePaths
 {
-    public const string BlazorBffShortName = "kd-blazor-bff";
+    public const string BlazorAppShortName = "kdsoftware-blazor-app";
 
     public static string RepositoryRoot { get; } = FindRepositoryRoot();
 
-    public static string BlazorBffTemplate { get; } =
-        Path.Combine(RepositoryRoot, "src", "KDSoftware.Blazor.Templates", "content", "BlazorBff");
+    public static string BlazorAppTemplate { get; } =
+        Path.Combine(RepositoryRoot, "src", "KDSoftware.Blazor.Templates", "content", "BlazorApp");
 
     private static string FindRepositoryRoot()
     {

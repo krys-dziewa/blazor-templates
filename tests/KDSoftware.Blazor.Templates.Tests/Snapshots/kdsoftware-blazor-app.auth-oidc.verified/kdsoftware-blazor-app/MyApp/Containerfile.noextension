@@ -1,0 +1,25 @@
+# Build from the solution root so that solution-level files (Directory.Build.props,
+# Directory.Packages.props, global.json, ...) are part of the build context, for example:
+#
+#   podman build -f src/MyApp/Containerfile --build-arg PROJECT_PATH=src/MyApp/MyApp.csproj -t myapp .
+#
+# PROJECT_PATH is relative to the build context. Behind a TLS-terminating reverse proxy, run the container with
+# ASPNETCORE_FORWARDEDHEADERS_ENABLED=true so that the app sees the original scheme (required for OIDC redirects
+# and the __Host- session cookie).
+
+ARG DOTNET_VERSION=10.0
+
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
+ARG PROJECT_PATH=MyApp/MyApp.csproj
+WORKDIR /src
+COPY . .
+# Host build output (for example obj/project.assets.json with host paths) must not leak into the container build.
+RUN find . -type d \( -name bin -o -name obj \) -prune -exec rm -rf {} +
+RUN dotnet publish "$PROJECT_PATH" --configuration Release --output /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION} AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+USER $APP_UID
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "MyApp.dll"]

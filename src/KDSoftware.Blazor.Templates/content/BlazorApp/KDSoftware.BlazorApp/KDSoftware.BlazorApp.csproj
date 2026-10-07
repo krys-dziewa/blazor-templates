@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!--#if (UseOidc) -->
+    <UserSecretsId>aspnet-KDSoftware.BlazorApp-53bc9b9d-9d6a-45d4-8429-2a2761773502</UserSecretsId>
+    <!--#endif -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KDSoftware.BlazorApp.Client\KDSoftware.BlazorApp.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--#if (UseCpm) -->
+    <!--#if (UseOidc) -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+    <!--#endif -->
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+    <PackageReference Include="Microsoft.Web.LibraryManager.Build" />
+    <!--#else -->
+    <!--#if (UseOidc) -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.12" />
+    <!--#endif -->
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="3.0.114" />
+    <!--#endif -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="libman.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <!--
+    LibMan restores client libraries into wwwroot/lib during the build, after wwwroot has already been globbed.
+    Include the restored files explicitly so that a clean build or publish (for example in a container) serves them.
+  -->
+  <Target Name="IncludeLibraryManagerFiles" AfterTargets="LibraryManagerRestore">
+    <ItemGroup>
+      <Content Include="wwwroot\lib\**" Exclude="@(Content)" />
+    </ItemGroup>
+  </Target>
+
+</Project>
