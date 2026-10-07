@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/kdsoftware-blazor-app/">
+    <Project Path="kdsoftware-blazor-app/MyApp.Client/MyApp.Client.csproj" />
+    <Project Path="kdsoftware-blazor-app/MyApp/MyApp.csproj" />
+  </Folder>
+</Solution>

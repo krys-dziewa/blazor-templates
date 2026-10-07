@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MyApp.Client\MyApp.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="3.0.114" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="libman.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <!--
+    LibMan restores client libraries into wwwroot/lib during the build, after wwwroot has already been globbed.
+    Include the restored files explicitly so that a clean build or publish (for example in a container) serves them.
+  -->
+  <Target Name="IncludeLibraryManagerFiles" AfterTargets="LibraryManagerRestore">
+    <ItemGroup>
+      <Content Include="wwwroot\lib\**" Exclude="@(Content)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

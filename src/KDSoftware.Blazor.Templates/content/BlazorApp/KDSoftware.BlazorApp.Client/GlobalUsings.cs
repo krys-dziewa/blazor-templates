@@ -1,0 +1,1 @@
+global using KDSoftware.BlazorApp.Client.Bff;
