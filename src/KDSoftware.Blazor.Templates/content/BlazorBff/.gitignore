@@ -485,6 +485,3 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-
-# Template snapshot test output awaiting review
-*.received/

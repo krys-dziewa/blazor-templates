@@ -1,0 +1,38 @@
+@inject HttpClient Http
+
+@*
+    Rendered with InteractiveWebAssembly and prerendering disabled: this component only makes sense in
+    the browser, so the server never renders it. The request goes to the BFF, which attaches the user's
+    access token and forwards it to the downstream API configured in the ReverseProxy section.
+*@
+
+<button class="btn btn-primary mb-3" disabled="@_loading" @onclick="CallApiAsync">Call downstream API</button>
+
+@if (_result is not null)
+{
+    <pre class="border rounded p-2"><code>@_result</code></pre>
+}
+
+@code {
+    private string? _result;
+    private bool _loading;
+
+    private async Task CallApiAsync()
+    {
+        _loading = true;
+        try
+        {
+            using HttpResponseMessage response = await Http.GetAsync("api/downstream/test");
+            string body = await response.Content.ReadAsStringAsync();
+            _result = $"{(int)response.StatusCode} {response.ReasonPhrase}{Environment.NewLine}{body}";
+        }
+        catch (HttpRequestException exception)
+        {
+            _result = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

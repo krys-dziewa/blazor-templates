@@ -1,16 +1,13 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
-    <File Path="AGENTS.md" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
     <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/KDSoftware.Blazor.Templates/KDSoftware.Blazor.Templates.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/KDSoftware.Blazor.Templates.Tests/KDSoftware.Blazor.Templates.Tests.csproj" />
+    <Project Path="src/BlazorBff/BlazorBff.csproj" />
+    <Project Path="src/BlazorBff.Client/BlazorBff.Client.csproj" />
   </Folder>
 </Solution>
